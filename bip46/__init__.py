@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 DERIVATION_PATH = "m/84'/0'/0'/2"
-
+DERIVATION_PATH_TESTNET = "m/84'/1'/0'/2"
 
 class Bip46TimeError(Exception):
     """Raised when a locktime is not in the valid range for BIP46 timelocks"""
@@ -30,10 +30,11 @@ def lockdate_to_index(lock_date: datetime) -> int:
     return (lock_date.year - 2020) * 12 + lock_date.month - 1
 
 
-def timelock_derivation_path(lock_date: datetime) -> str:
+def timelock_derivation_path(lock_date: datetime, network: str = "mainnet") -> str:
     """Derive the path for a BIP46 timelock"""
     i = lockdate_to_index(lock_date)
-    return f"{DERIVATION_PATH}/{i}"
+    path = DERIVATION_PATH if network == "mainnet" else DERIVATION_PATH_TESTNET
+    return f"{path}/{i}"
 
 
 def lockdate_to_little_endian(locktime: datetime) -> bytes:
