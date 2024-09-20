@@ -45,7 +45,7 @@ class TestTimelockDerivation:
     ])
     def test_timelock_derivation_path(self, path, index, network):
         date = index_to_lockdate(index)
-        assert timelock_derivation_path(date, network) == path
+        assert lockdate_to_derivation_path(date, network) == path
 
 
 class TestTimelockIndexToDate:
