@@ -24,7 +24,7 @@ jobs:
           cache: "poetry"
       - name: Install dependencies
         run: |
-          poetry install -E test
+          make install
       - name: Test with pytest
         run: |
           make test
