@@ -1,3 +1,5 @@
+import hashlib
+
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -5,6 +7,9 @@ import test_vectors as data
 from buidl import HDPrivateKey, WitnessScript
 
 from bip46 import lockdate_to_derivation_path, lockdate_to_little_endian
+
+
+assert "ripemd160" in hashlib.algorithms_available, "hashlib ripemd160 is not available"
 
 
 @dataclass
