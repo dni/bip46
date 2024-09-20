@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "bip46"
+version = "1.0.0"
+description = "A Python implementation of BIP46: Address Scheme for Timelocked Fidelity Bonds"
+authors = ["dni <dni@lnbits.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+  {include = "bip46"},
+  {include = "bip46/py.typed"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+buidl = {version="^0.2.36", optional=true}
+
+[tool.poetry.extras]
+test = ["buidl"]
+examples = ["buidl"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+ruff = "^0.6.6"
+mypy = "^1.11.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+# Enable:
+# F - pyflakes
+# E - pycodestyle errors
+# W - pycodestyle warnings
+# I - isort
+# A - flake8-builtins
+# C - mccabe
+# N - naming
+# UP - pyupgrade
+# RUF - ruff specific rules
+# B - bugbear
+select = ["F", "E", "W", "I", "A", "C", "N", "UP", "RUF", "B"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[[tool.mypy.overrides]]
+module = [
+  "buidl.*",
+]
+ignore_missing_imports = "True"
