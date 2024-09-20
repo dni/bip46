@@ -12,6 +12,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
+bech32 = "^1.2.0"
 buidl = {version="^0.2.36", optional=true}
 
 [tool.poetry.extras]

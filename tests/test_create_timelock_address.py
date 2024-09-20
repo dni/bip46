@@ -3,11 +3,14 @@ from datetime import datetime, timezone
 
 # from hashlib import algorithms_available
 import test_vectors as data
-from buidl import HDPrivateKey, WitnessScript
+from buidl import HDPrivateKey
 
-from bip46 import lockdate_to_derivation_path, lockdate_to_little_endian
-
-# assert "ripemd160" in algorithms_available, "hashlib ripemd160 is not available"
+from bip46 import (
+    create_lockscript,
+    lockdate_to_derivation_path,
+    lockscript_address,
+    lockscript_pubkey,
+)
 
 
 @dataclass
@@ -37,24 +40,19 @@ def _assert_script(lock_date: datetime, expected: Expected):
     lock_privkey = lock_child.private_key.wif()
     assert expected.derived_private_key == lock_privkey
 
-    lock_time = lockdate_to_little_endian(lock_date)
+    lock_script = create_lockscript(lock_date, lock_pubkey)
+    pubkey = lockscript_pubkey(lock_script)
+    address = lockscript_address(pubkey, network=data.network)
 
-    # locktime OP_CLTV OP_DROP pubkey OP_CHECKSIG
-    lock_script = WitnessScript([lock_time, 177, 117, lock_pubkey, 172])
-
-    # script_pubkey = lock_script.script_pubkey().raw_serialize()
-    # assert expected.script_pubkey == script_pubkey.hex()
-
-    lock_address = lock_script.address(network=data.network)
-    assert expected.address == lock_address
+    assert expected.script_pubkey == pubkey.hex()
+    assert expected.address == address
 
     # redeem_script = _redeem_script.serialize()
     # assert data.first_redeemscript == redeem_script.hex()
 
 
 class TestCreateTimelockAddress:
-    """ Test vectors for creating timelock addresses """
-
+    """Test vectors for creating timelock addresses"""
 
     def test_create_first_timelock_address(self):
         lock_date = datetime(2020, 1, 1, tzinfo=timezone.utc)
@@ -69,7 +67,6 @@ class TestCreateTimelockAddress:
         )
         _assert_script(lock_date, expected)
 
-
     def test_create_second_timelock_address(self):
         lock_date = datetime(2020, 2, 1, tzinfo=timezone.utc)
         expected = Expected(
@@ -83,7 +80,6 @@ class TestCreateTimelockAddress:
         )
         _assert_script(lock_date, expected)
 
-
     def test_create_third_timelock_address(self):
         lock_date = datetime(2040, 1, 1, tzinfo=timezone.utc)
         expected = Expected(
@@ -96,7 +92,6 @@ class TestCreateTimelockAddress:
             redeem_script=data.third_redeemscript,
         )
         _assert_script(lock_date, expected)
-
 
     def test_create_last_timelock_address(self):
         lock_date = datetime(2099, 12, 1, tzinfo=timezone.utc)
