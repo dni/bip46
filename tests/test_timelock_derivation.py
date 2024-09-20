@@ -37,6 +37,16 @@ class TestTimelockDerivation:
         expected_path = f"{DERIVATION_PATH}/{index}"
         assert path == expected_path
 
+    @pytest.mark.parametrize("path, index, network", [
+        ("m/84'/0'/0'/2/0", 0, "mainnet"),
+        ("m/84'/1'/0'/2/0", 0, "testnet"),
+        ("m/84'/1'/0'/2/0", 0, "signet"),
+        ("m/84'/1'/0'/2/0", 0, "regtest"),
+    ])
+    def test_timelock_derivation_path(self, path, index, network):
+        date = index_to_lockdate(index)
+        assert timelock_derivation_path(date, network) == path
+
 
 class TestTimelockIndexToDate:
 
