@@ -30,7 +30,7 @@ def lockdate_to_index(lock_date: datetime) -> int:
     return (lock_date.year - 2020) * 12 + lock_date.month - 1
 
 
-def timelock_derivation_path(lock_date: datetime, network: str = "mainnet") -> str:
+def lockdate_to_derivation_path(lock_date: datetime, network: str = "mainnet") -> str:
     """Derive the path for a BIP46 timelock"""
     i = lockdate_to_index(lock_date)
     path = DERIVATION_PATH if network == "mainnet" else DERIVATION_PATH_TESTNET
@@ -39,5 +39,8 @@ def timelock_derivation_path(lock_date: datetime, network: str = "mainnet") -> s
 
 def lockdate_to_little_endian(locktime: datetime) -> bytes:
     """Convert a lockdate to little-endian bytes for use in a script"""
+    # max signed int for 4bytes
+    max_int = 2 ** 31 - 1
     ts = int(locktime.timestamp())
-    return ts.to_bytes(5, "little")
+    size = 4 if ts <= max_int else 5
+    return ts.to_bytes(size, "little")
