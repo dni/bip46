@@ -1,7 +1,7 @@
-import bech32
-
 from datetime import datetime, timezone
 from hashlib import sha256
+
+import bech32
 
 DERIVATION_PATH = "m/84'/0'/0'/2"
 DERIVATION_PATH_TESTNET = "m/84'/1'/0'/2"
@@ -25,7 +25,7 @@ def create_lockscript(lock_date: datetime, pubkey: bytes) -> bytes:
     return (
         bytes([len(locktime_bytes)])  # 1 byte len of locktime
         + locktime_bytes  # 4 or 5 bytes of locktime
-        + bytes([176, 117]) # OP_CLTV OP_DROP
+        + bytes([177, 117]) # OP_CLTV OP_DROP
         + bytes([len(pubkey)]) # 1 byte len of pubkey
         + pubkey # pubkey
         + bytes([172]) # OP_CHECKSIG
@@ -34,22 +34,14 @@ def create_lockscript(lock_date: datetime, pubkey: bytes) -> bytes:
 
 def lockscript_pubkey(lockscript: bytes) -> bytes:
     """Create a lockscript pubkey for a BIP46 timelock"""
-    return bytes([0]) + sha256(lockscript).digest()
-
-
-def network_prefix(network: str) -> str:
-    """Return the network prefix"""
-    if network == "regtest":
-        return "bcrt"
-    if network == "mainnet":
-        return "bc"
-    return "tb"
+    encoded = sha256(lockscript).digest()
+    return bytes([0, len(encoded)]) + encoded
 
 
 def lockscript_address(script_pubkey: bytes, network: str = "mainnet") -> str:
     """Create a p2wpkh_address lockscript address for a BIP46 timelock"""
     hrp = network_prefix(network)
-    address = bech32.encode(hrp, 1, script_pubkey)
+    address = bech32.encode(hrp, 0, script_pubkey[2:])
     if not address:
         raise Bip46Bech32Error("Could not encode address")
     return address
@@ -88,3 +80,12 @@ def lockdate_to_little_endian(locktime: datetime) -> bytes:
     ts = int(locktime.timestamp())
     size = 4 if ts <= max_int else 5
     return ts.to_bytes(size, "little")
+
+
+def network_prefix(network: str) -> str:
+    """Return the network prefix"""
+    if network == "regtest":
+        return "bcrt"
+    if network == "mainnet":
+        return "bc"
+    return "tb"

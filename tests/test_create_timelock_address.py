@@ -42,9 +42,9 @@ def _assert_script(lock_date: datetime, expected: Expected):
 
     lock_script = create_lockscript(lock_date, lock_pubkey)
     pubkey = lockscript_pubkey(lock_script)
-    address = lockscript_address(pubkey, network=data.network)
-
     assert expected.script_pubkey == pubkey.hex()
+
+    address = lockscript_address(pubkey, network=data.network)
     assert expected.address == address
 
     # redeem_script = _redeem_script.serialize()
