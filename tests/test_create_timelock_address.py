@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-# from hashlib import algorithms_available
 import test_vectors as data
-from buidl import HDPrivateKey
 
 from bip46 import (
     create_lockscript,
+    hdkey_derive,
+    hdkey_from_mnemonic,
+    hdkey_to_pubkey,
+    hdkey_to_wif,
     lockdate_to_derivation_path,
     lockscript_address,
     lockscript_pubkey,
@@ -24,6 +26,14 @@ class Expected:
     path: str
 
 
+
+XPRV = {
+    "mainnet": bytes.fromhex("0488ade4"),
+    "testnet": bytes.fromhex("04358394"),
+    "signet": bytes.fromhex("04358394"),
+    "regtest": bytes.fromhex("04358394"),
+}
+
 def _assert_script(lock_date: datetime, expected: Expected):
     unix_locktime = int(lock_date.timestamp())
     assert expected.unix_locktime == unix_locktime
@@ -31,16 +41,15 @@ def _assert_script(lock_date: datetime, expected: Expected):
     lock_path = lockdate_to_derivation_path(lock_date)
     assert expected.path == lock_path
 
-    hdkey = HDPrivateKey.from_mnemonic(data.mnemonic, network=data.network)
-    lock_child = hdkey.traverse(lock_path)
+    hdkey = hdkey_from_mnemonic(data.mnemonic)
+    lock_child = hdkey_derive(hdkey, lock_path)
+    lock_priv_key = hdkey_to_wif(lock_child)
+    lock_pub_key = hdkey_to_pubkey(lock_child)
 
-    lock_pubkey = lock_child.pub.sec()
-    assert expected.derived_public_key == lock_pubkey.hex()
+    assert expected.derived_public_key == lock_pub_key.hex()
+    assert expected.derived_private_key == lock_priv_key
 
-    lock_privkey = lock_child.private_key.wif()
-    assert expected.derived_private_key == lock_privkey
-
-    lock_script = create_lockscript(lock_date, lock_pubkey)
+    lock_script = create_lockscript(lock_date, lock_pub_key)
     pubkey = lockscript_pubkey(lock_script)
     assert expected.script_pubkey == pubkey.hex()
 
