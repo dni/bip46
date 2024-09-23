@@ -7,7 +7,7 @@ from bip46 import (
     Bip46IndexError,
     Bip46TimeError,
     index_to_lockdate,
-    timelock_derivation_path,
+    lockdate_to_derivation_path,
 )
 
 valid_dates = [
@@ -29,23 +29,22 @@ class TestTimelockDerivation:
     )
     def test_date_out_of_range(self, lock_date):
         with pytest.raises(Bip46TimeError):
-            timelock_derivation_path(lock_date)
+            lockdate_to_derivation_path(lock_date)
 
     @pytest.mark.parametrize("index, lock_date", valid_dates)
     def test_date_in_range(self, index, lock_date):
-        path = timelock_derivation_path(lock_date)
+        path = lockdate_to_derivation_path(lock_date)
         expected_path = f"{DERIVATION_PATH}/{index}"
         assert path == expected_path
 
     @pytest.mark.parametrize("path, index, network", [
-        ("m/84'/0'/0'/2/0", 0, "mainnet"),
-        ("m/84'/1'/0'/2/0", 0, "testnet"),
-        ("m/84'/1'/0'/2/0", 0, "signet"),
+        ("m/84'/0'/0'/2/0", 0, "main"),
+        ("m/84'/1'/0'/2/0", 0, "test"),
         ("m/84'/1'/0'/2/0", 0, "regtest"),
     ])
     def test_timelock_derivation_path(self, path, index, network):
         date = index_to_lockdate(index)
-        assert timelock_derivation_path(date, network) == path
+        assert lockdate_to_derivation_path(date, network) == path
 
 
 class TestTimelockIndexToDate:

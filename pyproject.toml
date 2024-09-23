@@ -12,11 +12,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-buidl = {version="^0.2.36", optional=true}
-
-[tool.poetry.extras]
-test = ["buidl"]
-examples = ["buidl"]
+bech32 = "^1.2.0"
+embit = "^0.8.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
@@ -51,6 +48,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [[tool.mypy.overrides]]
 module = [
-  "buidl.*",
+  "embit.*",
 ]
 ignore_missing_imports = "True"

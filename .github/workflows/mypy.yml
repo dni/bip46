@@ -24,6 +24,6 @@ jobs:
           cache: 'poetry'
       - name: Install dependencies
         run: |
-          poetry install
+          make install
       - name: Run tests
         run: make mypy
