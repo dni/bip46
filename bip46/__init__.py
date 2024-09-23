@@ -17,23 +17,13 @@ class Bip46TimeError(Exception):
 class Bip46IndexError(Exception):
     """Raised when a locktime index is not in the valid range for BIP46 timelocks"""
 
+
 class Bip46PathError(Exception):
     """Raised when the derivation path is invalid"""
 
+
 class Bip46Bech32Error(Exception):
     """Raised when the bech32 encoding fails"""
-
-
-class Bip46MnemonicError(Exception):
-    """Raised when the mnemonic is invalid"""
-
-
-class Bip46MnemonicLengthError(Bip46MnemonicError):
-    """Raised when the mnemonic is not the correct length"""
-
-
-class Bip46MnemonicChecksumError(Bip46MnemonicError):
-    """Raised when the mnemonic checksum is incorrect"""
 
 
 def create_lockscript(lock_date: datetime, pubkey: bytes) -> bytes:
@@ -55,9 +45,9 @@ def lockscript_pubkey(lockscript: bytes) -> bytes:
     return bytes([0, len(encoded)]) + encoded
 
 
-def lockscript_address(script_pubkey: bytes, network: str = "mainnet") -> str:
+def lockscript_address(script_pubkey: bytes, network: str = "main") -> str:
     """Create a p2wpkh_address lockscript address for a BIP46 timelock"""
-    hrp = network_prefix(network)
+    hrp = NETWORKS[network]["bech32"]
     address = bech32.encode(hrp, 0, script_pubkey[2:])
     if not address:
         raise Bip46Bech32Error("Could not encode address")
@@ -83,10 +73,10 @@ def lockdate_to_index(lock_date: datetime) -> int:
     return (lock_date.year - 2020) * 12 + lock_date.month - 1
 
 
-def lockdate_to_derivation_path(lock_date: datetime, network: str = "mainnet") -> str:
+def lockdate_to_derivation_path(lock_date: datetime, network: str = "main") -> str:
     """Derive the path for a BIP46 timelock"""
     i = lockdate_to_index(lock_date)
-    path = DERIVATION_PATH if network == "mainnet" else DERIVATION_PATH_TESTNET
+    path = DERIVATION_PATH if network == "main" else DERIVATION_PATH_TESTNET
     return f"{path}/{i}"
 
 
@@ -99,26 +89,17 @@ def lockdate_to_little_endian(locktime: datetime) -> bytes:
     return ts.to_bytes(size, "little")
 
 
-def network_prefix(network: str) -> str:
-    """Return the network prefix"""
-    if network == "regtest":
-        return "bcrt"
-    if network == "mainnet":
-        return "bc"
-    return "tb"
-
-
 def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
-    """Create an PrivateKey from a mnemonic"""
+    """Create a HDKey from a mnemonic"""
     seed = mnemonic_to_seed(mnemonic)
     version = NETWORKS[network]["xprv"]
     master = HDKey.from_seed(seed, version=version)
     return master
 
 
-def hdkey_derive(privkey: HDKey, path: str) -> HDKey:
+def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
     """
-    Derive a child key from a private key
+    Derive a child key from a hdkey
     Path should be in the form of m/x/y/z where x' means hardened
     first child path for mainnet is m/84'/0'/0'/2/0
     """
@@ -126,7 +107,7 @@ def hdkey_derive(privkey: HDKey, path: str) -> HDKey:
         raise Bip46PathError(f"Invalid Path, should start with `m`: {path}")
     if not path.endswith(f"/2/{path.split('/')[-1]}"):
         raise Bip46PathError(f"Invalid Path, should end with `/2/x`: {path}")
-    return privkey.derive(path)
+    return hdkey.derive(path)
 
 
 def hdkey_to_wif(hdkey: HDKey) -> str:
