@@ -26,14 +26,6 @@ class Expected:
     path: str
 
 
-
-XPRV = {
-    "mainnet": bytes.fromhex("0488ade4"),
-    "testnet": bytes.fromhex("04358394"),
-    "signet": bytes.fromhex("04358394"),
-    "regtest": bytes.fromhex("04358394"),
-}
-
 def _assert_script(lock_date: datetime, expected: Expected):
     unix_locktime = int(lock_date.timestamp())
     assert expected.unix_locktime == unix_locktime
