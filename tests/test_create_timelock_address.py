@@ -4,14 +4,14 @@ from datetime import datetime, timezone
 import test_vectors as data
 
 from bip46 import (
-    create_lockscript,
+    create_redeemscript,
     hdkey_derive,
     hdkey_from_mnemonic,
     hdkey_to_pubkey,
     hdkey_to_wif,
     lockdate_to_derivation_path,
-    lockscript_address,
-    lockscript_pubkey,
+    redeemscript_address,
+    redeemscript_pubkey,
 )
 
 
@@ -34,22 +34,21 @@ def _assert_script(lock_date: datetime, expected: Expected):
     assert expected.path == lock_path
 
     hdkey = hdkey_from_mnemonic(data.mnemonic)
-    lock_child = hdkey_derive(hdkey, lock_path)
-    lock_priv_key = hdkey_to_wif(lock_child)
-    lock_pub_key = hdkey_to_pubkey(lock_child)
+    redeem_child = hdkey_derive(hdkey, lock_path)
+    redeem_priv_key = hdkey_to_wif(redeem_child)
+    redeem_pub_key = hdkey_to_pubkey(redeem_child)
 
-    assert expected.derived_public_key == lock_pub_key.hex()
-    assert expected.derived_private_key == lock_priv_key
+    assert expected.derived_public_key == redeem_pub_key.hex()
+    assert expected.derived_private_key == redeem_priv_key
 
-    lock_script = create_lockscript(lock_date, lock_pub_key)
-    pubkey = lockscript_pubkey(lock_script)
+    redeem_script = create_redeemscript(lock_date, redeem_pub_key)
+    assert expected.redeem_script == redeem_script.hex()
+
+    pubkey = redeemscript_pubkey(redeem_script)
     assert expected.script_pubkey == pubkey.hex()
 
-    address = lockscript_address(pubkey, network=data.network)
+    address = redeemscript_address(pubkey, network=data.network)
     assert expected.address == address
-
-    # redeem_script = _redeem_script.serialize()
-    # assert data.first_redeemscript == redeem_script.hex()
 
 
 class TestCreateTimelockAddress:
