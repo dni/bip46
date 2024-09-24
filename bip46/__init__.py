@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 from hashlib import sha256
 
 import bech32
-from embit.ec import PrivateKey, Signature
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
+from embit.ec import PrivateKey, Signature
 from embit.networks import NETWORKS
 
 DERIVATION_PATH = "m/84'/0'/0'/2"
