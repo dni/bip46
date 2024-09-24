@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 
 import bech32
+from embit.ec import PrivateKey, Signature
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
 from embit.networks import NETWORKS
@@ -24,6 +25,29 @@ class Bip46PathError(Exception):
 
 class Bip46Bech32Error(Exception):
     """Raised when the bech32 encoding fails"""
+
+
+def create_certificate_message(
+    pubkey: str,
+    message: str = "fidelity-bond-cert",
+    expiry: int = 375
+) -> str:
+    """Create a certificate message for a BIP46 timelock"""
+    return f"{message}|{pubkey}|{expiry}"
+
+
+def sign_certificate_message(
+    hdkey: HDKey,
+    message: str,
+    recoverable: bool = False,
+) -> Signature:
+    """Sign a certificate message for a BIP46 timelock"""
+    msg = message.encode()
+    prefix = b"\x18Bitcoin Signed Message:\n"
+    data = prefix + bytes([len(msg)]) + msg
+    # if recoverable:
+    #     return hdkey.sign()(data)
+    return hdkey.sign(data)
 
 
 def create_redeemscript(lock_date: datetime, pubkey: bytes) -> bytes:
@@ -100,6 +124,13 @@ def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
     """Create a HDKey from a mnemonic"""
     seed = mnemonic_to_seed(mnemonic)
     return hdkey_from_seed(seed, network)
+
+
+def hdkey_from_wif(wif: str, network: str = "main") -> HDKey:
+    """Create a HDKey from a WIF"""
+    privkey = PrivateKey.from_wif(wif)
+    assert wif, privkey.wif()
+    return hdkey_from_seed(privkey.secret, network)
 
 
 def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
