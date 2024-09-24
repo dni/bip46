@@ -26,8 +26,8 @@ class Bip46Bech32Error(Exception):
     """Raised when the bech32 encoding fails"""
 
 
-def create_lockscript(lock_date: datetime, pubkey: bytes) -> bytes:
-    """Create a lockscript pubkey for a BIP46 timelock"""
+def create_redeemscript(lock_date: datetime, pubkey: bytes) -> bytes:
+    """Create a redeemscript pubkey for a BIP46 timelock"""
     locktime_bytes = lockdate_to_little_endian(lock_date)
     return (
         bytes([len(locktime_bytes)])  # 1 byte len of locktime
@@ -39,14 +39,14 @@ def create_lockscript(lock_date: datetime, pubkey: bytes) -> bytes:
     )
 
 
-def lockscript_pubkey(lockscript: bytes) -> bytes:
-    """Create a lockscript pubkey for a BIP46 timelock"""
-    encoded = sha256(lockscript).digest()
+def redeemscript_pubkey(redeemscript: bytes) -> bytes:
+    """Create a redeemscript pubkey for a BIP46 timelock"""
+    encoded = sha256(redeemscript).digest()
     return bytes([0, len(encoded)]) + encoded
 
 
-def lockscript_address(script_pubkey: bytes, network: str = "main") -> str:
-    """Create a p2wpkh_address lockscript address for a BIP46 timelock"""
+def redeemscript_address(script_pubkey: bytes, network: str = "main") -> str:
+    """Create a p2wpkh_address redeemscript address for a BIP46 timelock"""
     hrp = NETWORKS[network]["bech32"]
     address = bech32.encode(hrp, 0, script_pubkey[2:])
     if not address:
