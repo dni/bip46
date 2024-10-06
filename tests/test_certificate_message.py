@@ -31,9 +31,11 @@ class TestCertificateMessage:
         redeem_pub_key = hdkey_to_pubkey(redeem_child)
 
         assert data.first_bond_private_key == redeem_priv_key
+        assert data.first_derived_public_key == redeem_pub_key.hex()
 
         redeemscript = create_redeemscript(lock_date, redeem_pub_key)
         script_pubkey = redeemscript_pubkey(redeemscript)
+        assert data.first_script_pubkey == script_pubkey.hex()
         assert data.first_script_pubkey == script_pubkey.hex()
 
         cert_priv_key = PrivateKey.from_wif(data.first_certificate_private_key)
@@ -53,14 +55,10 @@ class TestCertificateMessage:
         sig2 = redeem_child.sign(message_hash)
         assert redeem_child.verify(sig2, message_hash)
 
-        # sig_rec, sig_rec_id = _sign_recoverable(cert_priv_key.secret, message_hash)
-        sig2_rec, sig2_rec_id = _sign_recoverable(redeem_child.secret, message_hash)
+        sig_rec, sig_rec_id = _sign_recoverable(message_hash, redeem_child.secret)
 
-        # pub = _verify_recoverable_signature(sig_rec, sig_rec_id, message_hash)
-        pub2 = _verify_recoverable_signature(sig2_rec, sig2_rec_id, message_hash)
-
-        # assert pub.hex() == data.first_certificate_public_key
-        assert pub2.hex() == data.first_derived_public_key
+        pub_recovered = _verify_recoverable_signature(sig_rec, sig_rec_id, message_hash)
+        assert pub_recovered.hex() == data.first_derived_public_key
 
         # assert b64encode(sig_rec).decode() == data.first_certificate_signature
 
