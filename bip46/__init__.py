@@ -41,8 +41,8 @@ def create_redeemscript(lock_date: datetime, pubkey: bytes) -> bytes:
 
 def redeemscript_pubkey(redeemscript: bytes) -> bytes:
     """Create a redeemscript pubkey for a BIP46 timelock"""
-    encoded = sha256(redeemscript).digest()
-    return bytes([0, len(encoded)]) + encoded
+    hashed = sha256(redeemscript).digest()
+    return bytes([0, len(hashed)]) + hashed
 
 
 def redeemscript_address(script_pubkey: bytes, network: str = "main") -> str:
@@ -89,12 +89,17 @@ def lockdate_to_little_endian(locktime: datetime) -> bytes:
     return ts.to_bytes(size, "little")
 
 
-def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
-    """Create a HDKey from a mnemonic"""
-    seed = mnemonic_to_seed(mnemonic)
+def hdkey_from_seed(seed: bytes, network: str = "main") -> HDKey:
+    """Create a HDKey from a seed"""
     version = NETWORKS[network]["xprv"]
     master = HDKey.from_seed(seed, version=version)
     return master
+
+
+def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
+    """Create a HDKey from a mnemonic"""
+    seed = mnemonic_to_seed(mnemonic)
+    return hdkey_from_seed(seed, network)
 
 
 def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
