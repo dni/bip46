@@ -2,9 +2,10 @@ from datetime import datetime, timezone
 from hashlib import sha256
 
 import bech32
+from coincurve import PrivateKey as CoincurvePrivateKey
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
-from embit.ec import PrivateKey, Signature
+from embit.ec import PrivateKey
 from embit.networks import NETWORKS
 
 DERIVATION_PATH = "m/84'/0'/0'/2"
@@ -37,17 +38,15 @@ def create_certificate_message(
 
 
 def sign_certificate_message(
-    hdkey: HDKey,
+    private_key: bytes,
     message: str,
-    recoverable: bool = False,
-) -> Signature:
+) -> tuple[bytes, bytes]:
     """Sign a certificate message for a BIP46 timelock"""
     msg = message.encode()
     prefix = b"\x18Bitcoin Signed Message:\n"
     data = prefix + bytes([len(msg)]) + msg
-    # if recoverable:
-    #     return hdkey.sign()(data)
-    return hdkey.sign(data)
+    key = CoincurvePrivateKey(private_key)
+    return data, key.sign_recoverable(data)
 
 
 def create_redeemscript(lock_date: datetime, pubkey: bytes) -> bytes:

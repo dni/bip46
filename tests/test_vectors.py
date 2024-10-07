@@ -95,8 +95,8 @@ last_address = "bc1qsqex3czzqzrn0n6rjayvhddygj0rz8df4fj2uwk9dkzdqkt9f7zs5c493u"
 
 # Test certificate and endpoint signing using the first
 # timelocked address = m/84'/0'/0'/2/0 (see above)
-first_bond_private_key = "L2tQBEdhC48YLeEWNg3e4msk94iKfyVa9hdfzRwUERabZ53TfH3d"
-first_bond_p2pkh_address = "16vmiGpY1rEaYnpGgtG7FZgr2uFCpeDgV6"
+# first_bond_private_key = "L2tQBEdhC48YLeEWNg3e4msk94iKfyVa9hdfzRwUERabZ53TfH3d"
+# first_bond_p2pkh_address = "16vmiGpY1rEaYnpGgtG7FZgr2uFCpeDgV6"
 
 first_certificate_private_key = "KyZpNDKnfs94vbrwhJneDi77V6jF64PWPF8x5cdJb8ifgg2DUc9d"
 first_certificate_public_key = (

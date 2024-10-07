@@ -14,6 +14,7 @@ packages = [
 python = "^3.10"
 bech32 = "^1.2.0"
 embit = "^0.8.0"
+coincurve = "^20.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
