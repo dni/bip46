@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 import pytest
 
 from bip46 import (
-    DERIVATION_PATH,
     Bip46IndexError,
     Bip46TimeError,
     index_to_lockdate,
     lockdate_to_derivation_path,
 )
+from bip46.derivation import DERIVATION_PATH
 
 valid_dates = [
     (0, datetime(2020, 1, 1, tzinfo=timezone.utc)),
