@@ -42,6 +42,7 @@ first_address = "bc1qhhhf29f4nlyalyfrrpfrknxj9uwqk4qsyvkujsa7w0ulfur78xkspsqn84"
 first_message = (
     "fidelity-bond-cert|020000000000000000000000000000000000000000000000000000000000000001|375"
 )
+
 first_address = "bc1qhhhf29f4nlyalyfrrpfrknxj9uwqk4qsyvkujsa7w0ulfur78xkspsqn84"
 first_p2pkh_address = "16vmiGpY1rEaYnpGgtG7FZgr2uFCpeDgV6"
 first_signature = (
@@ -106,6 +107,9 @@ first_certificate_p2pkh_address = "1JaUQDVNRdhfNsVncGkXedaPSM5Gc54Hso"
 
 first_certificate_message = (
     "fidelity-bond-cert|0330d54fd0dd420a6e5f8d3624f5f3482cae350f79d5f0753bf5beef9c2d91af3c|375"
+)
+first_certificate_message_hash = (
+    "0bf60ceb8c54f310460710ce2f782d4f9e53fdfd4e9230032e53fb814a6ee176"
 )
 first_certificate_signature = (
     "INOP3cB9UW7F1e1Aglj8rI9QhnyxmgWDEPt+nOMvl7hJJne7rH/KCNDYvLiqNuB9qWaWUojutjRsgPJrvyDQ+0Y="

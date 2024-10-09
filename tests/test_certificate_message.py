@@ -1,12 +1,7 @@
+from base64 import b64encode
 from datetime import datetime, timezone
 
 import test_vectors as data
-from coincurve import PublicKey, verify_signature
-from coincurve.ecdsa import (
-    cdata_to_der,
-    deserialize_recoverable,
-    recoverable_convert,
-)
 
 from bip46 import (
     create_certificate_message,
@@ -14,6 +9,8 @@ from bip46 import (
     hdkey_from_mnemonic,
     hdkey_to_pubkey,
     lockdate_to_derivation_path,
+    prepare_certificate_message,
+    recover_from_signature_and_message,
     sign_certificate_message,
 )
 
@@ -25,6 +22,10 @@ class TestCertificateMessage:
         message = create_certificate_message(data.first_certificate_public_key)
         assert data.first_certificate_message == message
 
+        message_hash = prepare_certificate_message(message)
+        assert data.first_certificate_message_hash == message_hash.hex()
+
+
     def test_sign_certificate_message(self):
         hdkey = hdkey_from_mnemonic(data.mnemonic)
         lock_date = datetime(2020, 1, 1, tzinfo=timezone.utc)
@@ -32,27 +33,21 @@ class TestCertificateMessage:
         redeem_child = hdkey_derive(hdkey, lock_path)
         redeem_pub_key = hdkey_to_pubkey(redeem_child)
 
-        msg, sig = sign_certificate_message(redeem_child.secret, data.first_message)
+        assert redeem_pub_key.hex() == data.first_derived_public_key
 
-        recovered_pub_key = PublicKey.from_signature_and_message(sig, msg)
-        assert recovered_pub_key.format(compressed=True).hex() == redeem_pub_key.hex()
-        sig = deserialize_recoverable(sig)
-        sig = recoverable_convert(sig)
-        sig = cdata_to_der(sig)
+        sig = sign_certificate_message(redeem_child.secret, data.first_message)
 
-        assert verify_signature(sig, msg, redeem_pub_key)
+        recovered_pub_key = recover_from_signature_and_message(
+            b64encode(sig).decode(), data.first_message
+        )
+        assert recovered_pub_key.hex() == redeem_pub_key.hex()
 
-        # TODO: why? cannot recover and verify the signature of test vector
-        # sig2 = b64decode(data.first_signature)
-        # recovered_pubkey2 = PublicKey.from_signature_and_message(sig2, msg)
-        # assert recovered_pubkey2.format(compressed=True).hex() == redeem_pub_key.hex()
+        recovered_pubkey2 = recover_from_signature_and_message(
+            data.first_signature, data.first_message
+        )
+        assert recovered_pubkey2.hex() == redeem_pub_key.hex()
 
-        # sig2 = deserialize_recoverable(sig2)
-        # sig2 = der_to_cdata(sig2)
-        # sig2 = recoverable_convert(sig2)
-        # sig2 = cdata_to_der(sig2)
-
-        # assert verify_signature(sig2, msg, redeem_pub_key)
-
-        # TODO: what is this in the test vectors?
-        # assert data.first_p2pkh_address
+        recovered_pubkey3 = recover_from_signature_and_message(
+            data.first_certificate_signature, data.first_certificate_message
+        )
+        assert recovered_pubkey3.hex() == redeem_pub_key.hex()
