@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from .consts import DERIVATION_PATH, DERIVATION_PATH_TESTNET
 from .exceptions import Bip46IndexError, Bip46TimeError
 
 

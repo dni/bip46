@@ -4,6 +4,7 @@ from hashlib import sha256
 import bech32
 from embit.networks import NETWORKS
 
+from .consts import DEFAULT_NETWORK
 from .exceptions import Bip46Bech32Error
 
 
@@ -35,7 +36,7 @@ def redeemscript_pubkey(redeemscript: bytes) -> bytes:
     return bytes([0, len(hashed)]) + hashed
 
 
-def redeemscript_address(script_pubkey: bytes, network: str = "main") -> str:
+def redeemscript_address(script_pubkey: bytes, network: str = DEFAULT_NETWORK) -> str:
     """Create a p2wpkh_address redeemscript address for a BIP46 timelock"""
     hrp = NETWORKS[network]["bech32"]
     address = bech32.encode(hrp, 0, script_pubkey[2:])

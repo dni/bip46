@@ -1,15 +1,15 @@
 from dataclasses import dataclass
+
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
 from embit.ec import PrivateKey as EmbitPrivateKey
 from embit.networks import NETWORKS
 
-from .consts import MAX_INDEX, DERIVATION_PATH_TESTNET
+from .consts import DEFAULT_NETWORK, MAX_INDEX
+from .derivation import index_to_lockdate, lockindex_to_derivation_path
 from .electrs import get_txs_from_address
 from .exceptions import Bip46PathError
-from .script import create_redeemscript, redeemscript_pubkey, redeemscript_address
-from .derivation import index_to_lockdate
-
+from .script import create_redeemscript, redeemscript_address, redeemscript_pubkey
 
 
 @dataclass
@@ -20,16 +20,17 @@ class Bond:
     hdkey: HDKey
 
 
-def hdkey_scan(index: int, hdkey: HDKey) -> list[Bond]:
+def hdkey_scan(index: int, hdkey: HDKey, network: str = DEFAULT_NETWORK) -> list[Bond]:
     """
     Scan a path for all possible keys timelocks
     """
     bonds = []
-    hdkey_i = hdkey.derive(f"{DERIVATION_PATH_TESTNET}/{index}")
+    path = lockindex_to_derivation_path(index, network)
+    hdkey_i = hdkey.derive(path)
     pubkey = hdkey_to_pubkey(hdkey_i)
     lock_date = index_to_lockdate(index)
     redeemscript = create_redeemscript(lock_date, pubkey)
-    address = redeemscript_address(redeemscript_pubkey(redeemscript), "test")
+    address = redeemscript_address(redeemscript_pubkey(redeemscript), network)
     txs = get_txs_from_address(address)
     if len(txs) > 0:
         print(f"Found {len(txs)} timelocks for index {index} !!!")
@@ -38,31 +39,31 @@ def hdkey_scan(index: int, hdkey: HDKey) -> list[Bond]:
     return bonds
 
 
-def hdkey_scan_all(hdkey: HDKey) -> list[Bond]:
+def hdkey_scan_all(hdkey: HDKey, network: str = DEFAULT_NETWORK) -> list[Bond]:
     """
     Scan a path for all possible keys timelocks
     """
     bonds = []
     for i in range(MAX_INDEX):
         print(f"({i}/{MAX_INDEX}) Scanning for timelocks")
-        bonds.extend(hdkey_scan(i, hdkey))
+        bonds.extend(hdkey_scan(i, hdkey, network))
     return bonds
 
 
-def hdkey_from_seed(seed: bytes, network: str = "main") -> HDKey:
+def hdkey_from_seed(seed: bytes, network: str = DEFAULT_NETWORK) -> HDKey:
     """Create a HDKey from a seed"""
     version = NETWORKS[network]["xprv"]
     master = HDKey.from_seed(seed, version=version)
     return master
 
 
-def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
+def hdkey_from_mnemonic(mnemonic: str, network: str = DEFAULT_NETWORK) -> HDKey:
     """Create a HDKey from a mnemonic"""
     seed = mnemonic_to_seed(mnemonic)
     return hdkey_from_seed(seed, network)
 
 
-def hdkey_from_wif(wif: str, network: str = "main") -> HDKey:
+def hdkey_from_wif(wif: str, network: str = DEFAULT_NETWORK) -> HDKey:
     """Create a HDKey from a WIF"""
     privkey = EmbitPrivateKey.from_wif(wif)
     assert wif, privkey.wif()

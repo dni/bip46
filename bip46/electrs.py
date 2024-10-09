@@ -1,6 +1,6 @@
 import httpx
 
-ELECTRS_SERVER = "https://testnet-electrs.b1tco1n.org"
+from .consts import ELECTRS_SERVER
 
 
 def get_tx(txid: str, electrs_server: str = ELECTRS_SERVER) -> dict:

@@ -38,7 +38,7 @@ def create_redeem_transaction(
     redeemscript: bytes,
     address: str,
     fee_sats_vbyte: int = 10,
-    # network: str = "main",
+    # network: str = DEFAULT_NETWORK,
 ) -> str:
     """Create a redeem transaction for a BIP46 timelock"""
     tx_size = 100
