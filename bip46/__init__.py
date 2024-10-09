@@ -3,13 +3,9 @@ from datetime import datetime, timezone
 from hashlib import sha256
 
 import bech32
-
-# from coincurve import PublicKey, PrivateKey as CoincurvePrivateKey
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
 from embit.ec import PrivateKey as EmbitPrivateKey
-
-# from embit.ec import PrivateKey
 from embit.networks import NETWORKS
 from secp256k1 import PrivateKey, PublicKey
 
