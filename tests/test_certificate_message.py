@@ -9,10 +9,10 @@ from bip46 import (
     hdkey_from_mnemonic,
     hdkey_to_pubkey,
     lockdate_to_derivation_path,
-    prepare_certificate_message,
     recover_from_signature_and_message,
     sign_certificate_message,
 )
+from bip46.certificate import prepare_certificate_message
 
 
 class TestCertificateMessage:
@@ -21,7 +21,6 @@ class TestCertificateMessage:
     def test_create_certificate_message(self):
         message = create_certificate_message(data.first_certificate_public_key)
         assert data.first_certificate_message == message
-
         message_hash = prepare_certificate_message(message)
         assert data.first_certificate_message_hash == message_hash.hex()
 
