@@ -1,10 +1,13 @@
+from base64 import b64decode
 from datetime import datetime, timezone
 from hashlib import sha256
 
 import bech32
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
+from embit.ec import PrivateKey as EmbitPrivateKey
 from embit.networks import NETWORKS
+from secp256k1 import PrivateKey, PublicKey
 
 DERIVATION_PATH = "m/84'/0'/0'/2"
 DERIVATION_PATH_TESTNET = "m/84'/1'/0'/2"
@@ -24,6 +27,36 @@ class Bip46PathError(Exception):
 
 class Bip46Bech32Error(Exception):
     """Raised when the bech32 encoding fails"""
+
+
+class Bip46RecoveredPubkeyError(Exception):
+    """Raised when we could not recover the pubkey from signature and message"""
+
+
+def create_certificate_message(
+    pubkey: str,
+    message: str = "fidelity-bond-cert",
+    expiry: int = 375
+) -> str:
+    """Create a certificate message for a BIP46 timelock"""
+    return f"{message}|{pubkey}|{expiry}"
+
+
+def prepare_certificate_message(message: str) -> bytes:
+    msg = message.encode()
+    prefix = b"\x18Bitcoin Signed Message:\n"
+    data = prefix + bytes([len(msg)]) + msg
+    return sha256(sha256(data).digest()).digest()
+
+
+def sign_certificate_message(private_key: bytes, message: str) -> bytes:
+    """Sign a certificate message for a BIP46 timelock"""
+    message_hash = prepare_certificate_message(message)
+    key = PrivateKey(private_key)
+    raw_sig = key.ecdsa_sign_recoverable(message_hash, raw=True)
+    sig, recid = key.ecdsa_recoverable_serialize(raw_sig)
+    # 31 for p2pkh_address
+    return bytes([recid + 31]) + sig
 
 
 def create_redeemscript(lock_date: datetime, pubkey: bytes) -> bytes:
@@ -102,6 +135,13 @@ def hdkey_from_mnemonic(mnemonic: str, network: str = "main") -> HDKey:
     return hdkey_from_seed(seed, network)
 
 
+def hdkey_from_wif(wif: str, network: str = "main") -> HDKey:
+    """Create a HDKey from a WIF"""
+    privkey = EmbitPrivateKey.from_wif(wif)
+    assert wif, privkey.wif()
+    return hdkey_from_seed(privkey.secret, network)
+
+
 def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
     """
     Derive a child key from a hdkey
@@ -123,3 +163,39 @@ def hdkey_to_wif(hdkey: HDKey) -> str:
 def hdkey_to_pubkey(hdkey: HDKey) -> bytes:
     """Get the pubkey from an HDKey"""
     return hdkey.get_public_key().sec()
+
+
+def convert_recoverable_message_signature(sig_base64: str) -> tuple[bytes, int, bool]:
+    """ Convert a recoverable signature to a normal signature """
+    sig = b64decode(sig_base64)
+    if len(sig) != 65:
+        raise Bip46RecoveredPubkeyError("Invalid signature length")
+    header = int(sig[0])
+    if header < 27 or header > 42:
+        raise Bip46RecoveredPubkeyError(f"Header out of range: {header}")
+    r = sig[1:33]
+    s = sig[33:]
+    compressed = False
+    if(header >= 39): # this is a bech32 signature
+        header -= 12
+        compressed = True
+    # this is a segwit p2sh signature
+    elif header >= 35:
+        header -= 8
+        compressed = True
+    # this is a compressed key signature
+    elif header >= 31:
+        compressed = True
+        header -= 4
+    rec_id = header - 27
+    return r + s, rec_id, compressed
+
+
+def recover_from_signature_and_message(sig_base64: str, message: str) -> bytes:
+    """Recover a pubkey from signature and message"""
+    message_hash = prepare_certificate_message(message)
+    sig, recid, _ = convert_recoverable_message_signature(sig_base64)
+    empty = PublicKey()
+    sig = empty.ecdsa_recoverable_deserialize(sig, recid)
+    pubkey = empty.ecdsa_recover(message_hash, sig, raw=True)
+    return PublicKey(pubkey).serialize()
