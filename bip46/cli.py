@@ -26,12 +26,12 @@ from bip46.consts import DEFAULT_NETWORK
 # disable tracebacks on exceptions
 sys.tracebacklimit = 0
 
-def _check_private_key() -> HDKey:
+def _check_private_key(network: str) -> HDKey:
     """check if the environment is set"""
     if "SEED" in os.environ:
-        return hdkey_from_seed(os.environ["SEED"].encode())
+        return hdkey_from_seed(os.environ["SEED"].encode(), network)
     elif "MNEMONIC" in os.environ:
-        return hdkey_from_mnemonic(os.environ["MNEMONIC"])
+        return hdkey_from_mnemonic(os.environ["MNEMONIC"], network)
     else:
         click.echo("please set `SEED` or `MNEMONIC` environment variable")
         sys.exit(1)
@@ -51,7 +51,7 @@ def scan_all(network: str):
     """
     scan for all timelocks
     """
-    key = _check_private_key()
+    key = _check_private_key(network)
     bonds = hdkey_scan_all(key, network)
     print(f"Found {len(bonds)} timelocked bonds:")
     for bond in bonds:
@@ -64,7 +64,9 @@ def scan(index: int, network: str):
     """
     scan for all timelocks
     """
-    key = _check_private_key()
+    key = _check_private_key(network)
+    print("key:", key)
+    print("key:", key.key)
     bonds = hdkey_scan(index, key, network)
     print(f"Found {len(bonds)} timelocked bonds")
     for bond in bonds:
@@ -79,7 +81,7 @@ def create_timelock(year: int, month: int, network: str):
     """
     create a timelock address
     """
-    key = _check_private_key()
+    key = _check_private_key(network)
     lock_date = datetime(year, month, 1, tzinfo=timezone.utc)
     lock_path = lockdate_to_derivation_path(lock_date, network)
     redeem_child = hdkey_derive(key, lock_path)
