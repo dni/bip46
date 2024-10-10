@@ -33,7 +33,7 @@ class TestTimelockDerivation:
 
     @pytest.mark.parametrize("index, lock_date", valid_dates)
     def test_date_in_range(self, index, lock_date):
-        path = lockdate_to_derivation_path(lock_date)
+        path = lockdate_to_derivation_path(lock_date, "main")
         expected_path = f"{DERIVATION_PATH}/{index}"
         assert path == expected_path
 

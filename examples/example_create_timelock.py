@@ -23,7 +23,7 @@ redeem_priv_key = hdkey_to_wif(redeem_key)
 redeem_pub_key = hdkey_to_pubkey(redeem_key)
 redeem_script = create_redeemscript(lock_date, redeem_pub_key)
 script_pubkey = redeemscript_pubkey(redeem_script)
-script_address = redeemscript_address(script_pubkey, network="main")
+script_address = redeemscript_address(script_pubkey)
 
 print(f"lock date: {lock_date}")
 print(f"lock path: {lock_path}")

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from .consts import DERIVATION_PATH, DERIVATION_PATH_TESTNET
+from .consts import DEFAULT_NETWORK, DERIVATION_PATH, DERIVATION_PATH_TESTNET
 from .exceptions import Bip46IndexError, Bip46TimeError
 
 
@@ -23,13 +23,15 @@ def lockdate_to_index(lock_date: datetime) -> int:
     return (lock_date.year - 2020) * 12 + lock_date.month - 1
 
 
-def lockdate_to_derivation_path(lock_date: datetime, network: str = "main") -> str:
+def lockdate_to_derivation_path(
+    lock_date: datetime, network: str = DEFAULT_NETWORK
+) -> str:
     """Derive the path for a BIP46 timelock from a date"""
     i = lockdate_to_index(lock_date)
     return lockindex_to_derivation_path(i, network)
 
 
-def lockindex_to_derivation_path(index: int, network: str = "main") -> str:
+def lockindex_to_derivation_path(index: int, network: str = DEFAULT_NETWORK) -> str:
     """Derive the path for a BIP46 timelock from an index"""
     path = DERIVATION_PATH if network == "main" else DERIVATION_PATH_TESTNET
     return f"{path}/{index}"

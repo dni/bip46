@@ -32,6 +32,7 @@ from .hdkey import (
 from .script import create_redeemscript, redeemscript_address, redeemscript_pubkey
 
 
+# WIP
 def create_redeem_transaction(
     prevtxid: str,
     vout: int,
