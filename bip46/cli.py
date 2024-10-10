@@ -65,8 +65,6 @@ def scan(index: int, network: str):
     scan for all timelocks
     """
     key = _check_private_key(network)
-    print("key:", key)
-    print("key:", key.key)
     bonds = hdkey_scan(index, key, network)
     print(f"Found {len(bonds)} timelocked bonds")
     for bond in bonds:
