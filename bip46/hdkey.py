@@ -31,6 +31,7 @@ def hdkey_scan(index: int, hdkey: HDKey, network: str = DEFAULT_NETWORK) -> list
     lock_date = index_to_lockdate(index)
     redeemscript = create_redeemscript(lock_date, pubkey)
     address = redeemscript_address(redeemscript_pubkey(redeemscript), network)
+    print(f"({index}/{MAX_INDEX}) Scanning timelocks for address {address}")
     txs = get_txs_from_address(address)
     if len(txs) > 0:
         print(f"Found {len(txs)} timelocks for index {index} !!!")
@@ -45,7 +46,6 @@ def hdkey_scan_all(hdkey: HDKey, network: str = DEFAULT_NETWORK) -> list[Bond]:
     """
     bonds = []
     for i in range(MAX_INDEX):
-        print(f"({i}/{MAX_INDEX}) Scanning for timelocks")
         bonds.extend(hdkey_scan(i, hdkey, network))
     return bonds
 
