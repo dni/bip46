@@ -1,11 +1,11 @@
 """ Example of a timelock withdrawal transaction """
 
-from embit.script import address_to_scriptpubkey, Script, Witness
+from embit.script import Script, Witness, address_to_scriptpubkey
 from embit.transaction import Transaction, TransactionInput, TransactionOutput
 
-from bip46.electrs import  get_txs_from_address, get_vout_from_tx
+from bip46.derivation import index_to_lockdate, lockindex_to_derivation_path
+from bip46.electrs import get_txs_from_address, get_vout_from_tx
 from bip46.hdkey import hdkey_derive, hdkey_from_mnemonic, hdkey_to_pubkey
-from bip46.derivation import lockindex_to_derivation_path, index_to_lockdate
 from bip46.script import create_redeemscript
 
 NETWORK = "test"
