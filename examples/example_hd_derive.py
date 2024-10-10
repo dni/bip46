@@ -1,8 +1,7 @@
 """ embit sanity example """
-from embit.networks import NETWORKS
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
-
+from embit.networks import NETWORKS
 
 mnemonic = (
     "abandon abandon abandon abandon abandon abandon"
