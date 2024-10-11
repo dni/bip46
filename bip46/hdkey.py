@@ -2,10 +2,8 @@ from dataclasses import dataclass
 
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
-from embit.ec import PrivateKey as EmbitPrivateKey
-from embit.networks import NETWORKS
 
-from .consts import DEFAULT_NETWORK, MAX_INDEX
+from .consts import DEFAULT_NETWORK, MAX_INDEX, NETWORKS
 from .derivation import index_to_lockdate, lockindex_to_derivation_path
 from .electrs import get_txs_from_address
 from .exceptions import Bip46PathError
@@ -63,13 +61,6 @@ def hdkey_from_mnemonic(mnemonic: str, network: str = DEFAULT_NETWORK) -> HDKey:
     return hdkey_from_seed(seed, network)
 
 
-def hdkey_from_wif(wif: str, network: str = DEFAULT_NETWORK) -> HDKey:
-    """Create a HDKey from a WIF"""
-    privkey = EmbitPrivateKey.from_wif(wif)
-    assert wif, privkey.wif()
-    return hdkey_from_seed(privkey.secret, network)
-
-
 def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
     """
     Derive a child key from a hdkey
@@ -81,11 +72,6 @@ def hdkey_derive(hdkey: HDKey, path: str) -> HDKey:
     if not path.endswith(f"/2/{path.split('/')[-1]}"):
         raise Bip46PathError(f"Invalid Path, should end with `/2/x`: {path}")
     return hdkey.derive(path)
-
-
-def hdkey_to_wif(hdkey: HDKey) -> str:
-    """Get the WIF from an HDKey"""
-    return str(hdkey.key)
 
 
 def hdkey_to_pubkey(hdkey: HDKey) -> bytes:

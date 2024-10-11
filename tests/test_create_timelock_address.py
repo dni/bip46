@@ -8,7 +8,6 @@ from bip46 import (
     hdkey_derive,
     hdkey_from_mnemonic,
     hdkey_to_pubkey,
-    hdkey_to_wif,
     lockdate_to_derivation_path,
     redeemscript_address,
     redeemscript_pubkey,
@@ -36,11 +35,10 @@ def _assert_script(lock_date: datetime, expected: Expected):
 
     hdkey = hdkey_from_mnemonic(data.mnemonic, network=expected.network)
     redeem_child = hdkey_derive(hdkey, lock_path)
-    redeem_priv_key = hdkey_to_wif(redeem_child)
     redeem_pub_key = hdkey_to_pubkey(redeem_child)
 
     assert expected.derived_public_key == redeem_pub_key.hex()
-    assert expected.derived_private_key == redeem_priv_key
+    assert expected.derived_private_key == str(redeem_child.key)
 
     redeem_script = create_redeemscript(lock_date, redeem_pub_key)
     assert expected.redeem_script == redeem_script.hex()
@@ -58,7 +56,7 @@ class TestCreateTimelockAddress:
     def test_create_first_timelock_address(self):
         lock_date = datetime(2020, 1, 1, tzinfo=timezone.utc)
         expected = Expected(
-            network="main",
+            network=data.network,
             path="m/84'/0'/0'/2/0",
             unix_locktime=data.first_unix_locktime,
             derived_public_key=data.first_derived_public_key,
@@ -72,7 +70,7 @@ class TestCreateTimelockAddress:
     def test_create_second_timelock_address(self):
         lock_date = datetime(2020, 2, 1, tzinfo=timezone.utc)
         expected = Expected(
-            network="main",
+            network=data.network,
             path="m/84'/0'/0'/2/1",
             unix_locktime=data.second_unix_locktime,
             derived_public_key=data.second_derived_public_key,
@@ -86,7 +84,7 @@ class TestCreateTimelockAddress:
     def test_create_third_timelock_address(self):
         lock_date = datetime(2040, 1, 1, tzinfo=timezone.utc)
         expected = Expected(
-            network="main",
+            network=data.network,
             path="m/84'/0'/0'/2/240",
             unix_locktime=data.third_unix_locktime,
             derived_public_key=data.third_derived_public_key,
@@ -100,7 +98,7 @@ class TestCreateTimelockAddress:
     def test_create_last_timelock_address(self):
         lock_date = datetime(2099, 12, 1, tzinfo=timezone.utc)
         expected = Expected(
-            network="main",
+            network=data.network,
             path="m/84'/0'/0'/2/959",
             unix_locktime=data.last_unix_locktime,
             derived_public_key=data.last_derived_public_key,

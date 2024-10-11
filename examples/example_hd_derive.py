@@ -1,7 +1,8 @@
 """ embit sanity example """
 from embit.bip32 import HDKey
 from embit.bip39 import mnemonic_to_seed
-from embit.networks import NETWORKS
+
+from bip46.consts import NETWORKS
 
 mnemonic = (
     "abandon abandon abandon abandon abandon abandon"
@@ -9,7 +10,7 @@ mnemonic = (
 )
 print(f"mnemonic: {mnemonic}")
 seed = mnemonic_to_seed(mnemonic)
-version = NETWORKS["test"]["xprv"]
+version = NETWORKS["testnet"]["xprv"]
 print(f"version: {version}")
 master = HDKey.from_seed(seed, version=version)
 

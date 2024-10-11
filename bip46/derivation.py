@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from .consts import DEFAULT_NETWORK, DERIVATION_PATH, DERIVATION_PATH_TESTNET
+from .consts import DEFAULT_NETWORK, NETWORKS
 from .exceptions import Bip46IndexError, Bip46TimeError
 
 
@@ -33,5 +33,5 @@ def lockdate_to_derivation_path(
 
 def lockindex_to_derivation_path(index: int, network: str = DEFAULT_NETWORK) -> str:
     """Derive the path for a BIP46 timelock from an index"""
-    path = DERIVATION_PATH if network == "main" else DERIVATION_PATH_TESTNET
-    return f"{path}/{index}"
+    bip32 = NETWORKS[network]["bip32"]
+    return f"m/84'/{bip32}'/0'/2/{index}"

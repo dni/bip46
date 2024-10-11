@@ -5,7 +5,6 @@ from bip46 import (
     hdkey_derive,
     hdkey_from_mnemonic,
     hdkey_to_pubkey,
-    hdkey_to_wif,
     lockdate_to_derivation_path,
     redeemscript_address,
     redeemscript_pubkey,
@@ -19,7 +18,6 @@ hdkey = hdkey_from_mnemonic(
     " abandon abandon abandon abandon abandon about"
 )
 redeem_key = hdkey_derive(hdkey, lock_path)
-redeem_priv_key = hdkey_to_wif(redeem_key)
 redeem_pub_key = hdkey_to_pubkey(redeem_key)
 redeem_script = create_redeemscript(lock_date, redeem_pub_key)
 script_pubkey = redeemscript_pubkey(redeem_script)
@@ -27,7 +25,6 @@ script_address = redeemscript_address(script_pubkey)
 
 print(f"lock date: {lock_date}")
 print(f"lock path: {lock_path}")
-print(f"lock key: {redeem_priv_key}")
 print(f"lock pubkey: {redeem_pub_key.hex()}")
 print(f"redeem script: {redeem_script.hex()}")
 print(f"script pubkey: {script_pubkey.hex()}")
