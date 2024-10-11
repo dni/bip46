@@ -23,11 +23,9 @@ from .hdkey import (
     hdkey_derive,
     hdkey_from_mnemonic,
     hdkey_from_seed,
-    hdkey_from_wif,
     hdkey_scan,
     hdkey_scan_all,
     hdkey_to_pubkey,
-    hdkey_to_wif,
 )
 from .script import create_redeemscript, redeemscript_address, redeemscript_pubkey
 
@@ -67,8 +65,6 @@ __all__ = [
     "hdkey_scan_all",
     "hdkey_derive",
     "hdkey_to_pubkey",
-    "hdkey_to_wif",
-    "hdkey_from_wif",
     "hdkey_from_seed",
     "hdkey_from_mnemonic",
     # derivation

@@ -57,12 +57,13 @@ def scan_all(network: str):
     for bond in bonds:
         print(bond.index, bond.txid, bond.address)
 
+
 @click.command()
 @click.argument("index", type=int)
 @click.argument("network", type=str, default=DEFAULT_NETWORK)
 def scan(index: int, network: str):
     """
-    scan for all timelocks
+    scan for a timelock at a specific index
     """
     key = _check_private_key(network)
     bonds = hdkey_scan(index, key, network)

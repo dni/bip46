@@ -13,9 +13,8 @@ hdkey = hdkey_from_mnemonic(
     " abandon abandon abandon abandon abandon about"
 )
 lock_key = hdkey_derive(hdkey, lock_path)
-lock_priv_key = hdkey_to_wif(lock_key)
 lock_pub_key = hdkey_to_pubkey(lock_key)
 lock_script = create_lockscript(lock_date, lock_pub_key)
 script_pubkey = lockscript_pubkey(lock_script)
-script_address = lockscript_address(script_pubkey, network="main")
+script_address = lockscript_address(script_pubkey, network="mainnet")
 ```

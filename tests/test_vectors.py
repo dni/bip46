@@ -4,7 +4,7 @@ Code generating these test vectors can be found here:
 https://github.com/chris-belcher/timelocked-addresses-fidelity-bond-bip-testvectors
 """
 
-network = "main"
+network = "mainnet"
 mnemonic = (
     "abandon abandon abandon abandon abandon abandon"
     " abandon abandon abandon abandon abandon about"

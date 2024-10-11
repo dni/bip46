@@ -26,9 +26,9 @@ class TestCertificateMessage:
 
 
     def test_sign_certificate_message(self):
-        hdkey = hdkey_from_mnemonic(data.mnemonic, "main")
+        hdkey = hdkey_from_mnemonic(data.mnemonic, data.network)
         lock_date = datetime(2020, 1, 1, tzinfo=timezone.utc)
-        lock_path = lockdate_to_derivation_path(lock_date, "main")
+        lock_path = lockdate_to_derivation_path(lock_date, data.network)
         redeem_child = hdkey_derive(hdkey, lock_path)
         redeem_pub_key = hdkey_to_pubkey(redeem_child)
 

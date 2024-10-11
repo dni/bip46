@@ -4,11 +4,11 @@ from embit.script import Script, Witness, address_to_scriptpubkey
 from embit.transaction import Transaction, TransactionInput, TransactionOutput
 
 from bip46.derivation import index_to_lockdate, lockindex_to_derivation_path
-from bip46.electrs import get_txs_from_address, get_vout_from_tx
+from bip46.electrs import get_txs_from_address, get_vout_from_txs
 from bip46.hdkey import hdkey_derive, hdkey_from_mnemonic, hdkey_to_pubkey
 from bip46.script import create_redeemscript
 
-NETWORK = "test"
+NETWORK = "testnet"
 MNEMONIC = (
     "abandon abandon abandon abandon abandon abandon"
     " abandon abandon abandon abandon abandon about"
@@ -23,11 +23,6 @@ fee_sats_vbyte = 20
 tx_size = 200
 fee_sats = fee_sats_vbyte * tx_size
 
-# get onchain data
-txs = get_txs_from_address(TIMELOCK_ADDRESS)
-output = get_vout_from_tx(txs[0], TIMELOCK_ADDRESS)
-assert output, f"No timelock output found for address {TIMELOCK_ADDRESS}"
-
 # recreate redeem script
 lock_path = lockindex_to_derivation_path(TIMELOCK_INDEX, NETWORK)
 lock_date = index_to_lockdate(TIMELOCK_INDEX)
@@ -36,8 +31,13 @@ redeem_child = hdkey_derive(hdkey, lock_path)
 redeem_pub_key = hdkey_to_pubkey(redeem_child)
 redeem_script = create_redeemscript(lock_date, redeem_pub_key)
 
+# get onchain data
+txs = get_txs_from_address(TIMELOCK_ADDRESS)
+output = get_vout_from_txs(txs, TIMELOCK_ADDRESS)
+assert output, f"No timelock output found for address {TIMELOCK_ADDRESS}"
+prevtxid, vout, value = output
+
 # prepare transaction
-prevtxid, vout, value, redeemscript = output
 receive_address = address_to_scriptpubkey(RECEIVE_ADDRESS)
 txout = TransactionOutput(value - fee_sats, receive_address)
 # sequence for rbf / absolute locktime
@@ -53,5 +53,4 @@ sig = redeem_child.sign(h).serialize() + bytes([0x01]) # SIGHASH.ALL
 witness_script = Witness(items=[sig, redeem_script])
 tx.vin[0].witness = witness_script
 
-rawtx = tx.serialize()
-print(f"raw transaction: {rawtx.hex()}")
+print(f"raw transaction: {tx.serialize().hex()}")

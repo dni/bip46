@@ -16,6 +16,7 @@ def create_certificate_message(
 
 
 def prepare_certificate_message(message: str) -> bytes:
+    """ message hash for signing """
     msg = message.encode()
     prefix = b"\x18Bitcoin Signed Message:\n"
     data = prefix + bytes([len(msg)]) + msg
@@ -30,16 +31,6 @@ def sign_certificate_message(private_key: bytes, message: str) -> bytes:
     sig, recid = key.ecdsa_recoverable_serialize(raw_sig)
     # 31 for p2pkh_address
     return bytes([recid + 31]) + sig
-
-
-def recover_from_signature_and_message(sig_base64: str, message: str) -> bytes:
-    """Recover a pubkey from signature and message"""
-    message_hash = prepare_certificate_message(message)
-    sig, recid, _ = convert_recoverable_message_signature(sig_base64)
-    empty = PublicKey()
-    sig = empty.ecdsa_recoverable_deserialize(sig, recid)
-    pubkey = empty.ecdsa_recover(message_hash, sig, raw=True)
-    return PublicKey(pubkey).serialize()
 
 
 def convert_recoverable_message_signature(sig_base64: str) -> tuple[bytes, int, bool]:
@@ -66,3 +57,13 @@ def convert_recoverable_message_signature(sig_base64: str) -> tuple[bytes, int, 
         header -= 4
     rec_id = header - 27
     return r + s, rec_id, compressed
+
+
+def recover_from_signature_and_message(sig_base64: str, message: str) -> bytes:
+    """Recover a pubkey from signature and message"""
+    message_hash = prepare_certificate_message(message)
+    sig, recid, _ = convert_recoverable_message_signature(sig_base64)
+    empty = PublicKey()
+    sig = empty.ecdsa_recoverable_deserialize(sig, recid)
+    pubkey = empty.ecdsa_recover(message_hash, sig, raw=True)
+    return PublicKey(pubkey).serialize()
